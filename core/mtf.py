@@ -1,59 +1,67 @@
-import struct
+# mtfwiki.py
+from typing import List, Tuple, Union
+
+# Instead of always transmitting an "original" dictionary, it is simpler to just agree on an initial set.
+# Here we use the 256 possible values of a byte:
+common_dictionary = list(range(256))
 
 
-def encode(string):
-    """ Transforms a given byte string to a Move-To-Front number sequence """
-    alph = list(set(string))
-    orgalph = alph[:]
-    sequence = []
-    for i in string:
-        n = alph.index(i)
-        sequence.append(n)
-        while n > 0:
-            alph[n] = alph[n - 1]
-            n = n - 1
-        alph[0] = i
-    return sequence, orgalph
+def encode(plain_text: str) -> List[int]:
+    # Change to bytes for 256.
+    plain_text = plain_text.encode('utf-8')
+
+    # Changing the common dictionary is a bad idea. Make a copy.
+    dictionary = common_dictionary.copy()
+
+    # Transformation
+    compressed_text = list()  # Regular array
+    rank = 0
+
+    # Read in each character
+    for c in plain_text:
+        rank = dictionary.index(c)  # Find the rank of the character in the dictionary [O(k)]
+        compressed_text.append(rank)  # Update the encoded text
+
+        # Update the dictionary [O(k)]
+        dictionary.pop(rank)
+        dictionary.insert(0, c)
+
+    return compressed_text  # Return the encoded text
 
 
-def decode(sequence, alph):
-    string = ''
-    for i in range(len(sequence)):
-        string = string + alph[sequence[i]]
-        c = alph[sequence[i]]
-        n = sequence[i]
-        while n > 0:
-            alph[n] = alph[n - 1]
-            n = n - 1
-        alph[0] = c
-    return string
+def encode_file(file_path):
+    text = open(file_path, "r").read()
+    file_out = open(file_path + ".mtf", "w")
+    encoded = encode(text)
+    for element in encoded:
+        file_out.write(str(element) + "\n")
+    file_out.close()
 
 
-def encodeFile(infile, outfile):
-    fi = open(infile, "rb").read()
-    seq, alph = encode(fi)
+def decode(compressed_data: List[int]) -> str:
+    compressed_text = compressed_data
+    dictionary = common_dictionary.copy()
+    plain_text = []
 
-    fo = open(outfile, "wb")
-    fo.write(struct.pack('i', len(seq)))
-    for i in seq:
-        fo.write(struct.pack('c', chr(i)))
-    fo.write(struct.pack('i', len(alph)))
-    fo.write(struct.pack('c' * len(alph), *alph))
-    fo.close()
+    # Read in each rank in the encoded text
+    for rank in compressed_text:
+        # Read the character of that rank from the dictionary
+        plain_text.append(dictionary[rank])
+
+        # Update the dictionary
+        e = dictionary.pop(rank)
+        dictionary.insert(0, e)
+
+    return bytes(plain_text).decode('utf-8')  # Return original string
 
 
-def decodeFile(infile, outfile):
-    fi = open(infile, "rb")
-    n = struct.unpack('i', fi.read(4))[0]
-    seq = []
-    for x in range(n):
-        seq.append(ord(fi.read(1)))
-    n = struct.unpack('i', fi.read(4))[0]
-    alph = []
-    for x in range(n):
-        alph.append(fi.read(1))
-    a = decode(seq, alph)
+def decode_file(file_path):
+    text = open(file_path, "r").read()
+    arr = text.split("\n")
+    int_arr = list(map(lambda e: int(e), arr[:-1]))
 
-    fo = open(outfile, "wb")
-    fo.write(a)
-    fo.close()
+    decoded = decode(int_arr)
+
+    file_out = open(file_path.replace(".mtf", ""), "w")
+    file_out.write(decoded)
+    file_out.close()

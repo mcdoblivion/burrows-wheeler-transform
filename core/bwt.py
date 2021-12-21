@@ -74,8 +74,12 @@ def encode_file(infile, outfile):
 
 
 def decode_file(infile, outfile):
+    print(infile)
     fi = open(infile, "r").read()
     fo = open(outfile, "w")
     fo.write(decode(fi))
-    fi.close()
     fo.close()
+
+
+# encode_file("../tests/test.txt", "../tests/test.txt.bwt")
+# decode_file("../tests/test.txt.bwt", "../tests/test.txt.decoded")

@@ -65,3 +65,6 @@ def decode_file(file_path):
     file_out = open(file_path.replace(".mtf", ""), "w")
     file_out.write(decoded)
     file_out.close()
+
+
+# encode_file("../tests/test.txt")

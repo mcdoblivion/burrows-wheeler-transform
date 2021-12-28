@@ -6,6 +6,7 @@ works only with alphanumeric symbols, ASCII 0-255
 from collections import Counter
 from queue import PriorityQueue
 import os
+import pprint
 
 
 class HuffmanNode:
@@ -21,6 +22,7 @@ class HuffmanNode:
 
 def encode(text):
     """Returns encoded string code with format [encoded_huffman_tree][extra_zeros_num][encoded_text]"""
+    print("\n* Start Huffman encoding:\n")
 
     frequencies = Counter(text)
     queue = PriorityQueue()
@@ -42,6 +44,8 @@ def encode(text):
     for c in text:
         encoded_text_code += code_table[c]
 
+    raw_encoded_text_code = encoded_text_code
+
     encoded_tree_code = _encode_huffman_tree(huffman_tree, "")
 
     # add extra zeros, as in python it is not possible read
@@ -51,9 +55,11 @@ def encode(text):
     if num != 0:
         encoded_text_code = num * "0" + encoded_text_code
 
-    print(f"frequencies: {frequencies}")
-    print(f"encoded huffman tree code: {encoded_tree_code}")
-    print(f"encoded text code: {encoded_text_code}")
+    print(f"* frequencies: {frequencies}")
+    print(f"* encoded huffman tree code:\n{encoded_tree_code}")
+    print("* code table:")
+    pprint.pprint(code_table)
+    print(f"* encoded text code:\n{raw_encoded_text_code}")
 
     return f"{encoded_tree_code}{num:08b}{encoded_text_code}"
 
@@ -61,6 +67,7 @@ def encode(text):
 def decode(encoded_text):
     """Returns decoded string"""
 
+    print(f"* huffman decode input:\n{encoded_text}")
     encoded_text_ar = list(encoded_text)
     encoded_tree = _decode_huffman_tree(encoded_text_ar)
 
@@ -127,7 +134,8 @@ def _encode_huffman_tree(node, tree_text):
 
     if node.char is not None:
         tree_text += "1"
-        tree_text += f"{ord(node.char):08b}"
+        char_code = node.char if type(node.char) is int else ord(node.char)
+        tree_text += f"{char_code:08b}"
     else:
         tree_text += "0"
         tree_text = _encode_huffman_tree(node.left, tree_text)
@@ -162,6 +170,7 @@ def _print_ratio(input_path, output_path):
     print(f"before: {before_size}bytes, after: {after_size}bytes, "
           f"compression {compression_percent}%")
 
+# encode([97, 110, 0, 0, 0, 99, 0, 2, 39, 1, 0, 0, 0])
 
-# compress("../tests/test2.txt", "../tests/test2.bin")
-# decompress("../tests/test2.bin", "../tests/test2-decompress.txt")
+# compress("../tests/test.txt", "../tests/test.bin")
+# decompress("../tests/test.bin", "../tests/test-decompress.txt")

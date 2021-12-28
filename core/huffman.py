@@ -87,6 +87,7 @@ def decode(encoded_text):
             text += current_node.char
             current_node = encoded_tree
 
+    print(f"* huffman decode output:\n{text}")
     return text
 
 

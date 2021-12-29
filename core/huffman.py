@@ -64,7 +64,7 @@ def encode(text):
     return f"{encoded_tree_code}{num:08b}{encoded_text_code}"
 
 
-def decode(encoded_text):
+def decode(encoded_text, to_text=True):
     """Returns decoded string"""
 
     print(f"* huffman decode input:\n{encoded_text}")
@@ -86,6 +86,10 @@ def decode(encoded_text):
         if current_node.char is not None:
             text += current_node.char
             current_node = encoded_tree
+
+    # return array if to_text flag is False
+    if to_text is False:
+        text = list(map(ord, list(text)))
 
     print(f"* huffman decode output:\n{text}")
     return text
@@ -172,6 +176,7 @@ def _print_ratio(input_path, output_path):
           f"compression {compression_percent}%")
 
 # encode([97, 110, 0, 0, 0, 99, 0, 2, 39, 1, 0, 0, 0])
+# decode("0001000000101011000110010110000110010011101000000011011011101000000000000011000000001000111111001100001010110111", False)
 
 # compress("../tests/test.txt", "../tests/test.bin")
 # decompress("../tests/test.bin", "../tests/test-decompress.txt")
